@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suporte Remoto — Elétrica e Automação</title>
+<style>
+  :root{--azul:#1B3A6B;--azul-2:#2A5490;--conves:#EEF1F5;--aco:#C3CCD8;--tinta:#14202E;--fraca:#5B6A7B;--sinal:#D9A227;--alerta:#A8443B;--ok:#1E7A46;--zap:#1F8F4E}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--conves);color:var(--tinta);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-size:16px;line-height:1.5}
+  .oculto{display:none !important}
+
+  #topo{background:var(--azul);color:#EDF2F8;padding:11px 14px 9px;border-bottom:4px solid var(--sinal);position:sticky;top:0;z-index:10}
+  #topo .t{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  #topo h1{margin:0;font-size:.94rem;font-weight:600}
+  .medidores{display:flex;gap:12px;margin-top:8px;font-size:.72rem;color:#A9BFDA}
+  .medidores>div{flex:1}
+  .medidores .rot{display:flex;justify-content:space-between;margin-bottom:3px}
+  .medidores b{color:#EDF2F8;font-weight:600}
+  .barra{height:6px;background:#2E4E7E;border-radius:1px;overflow:hidden}
+  .barra i{display:block;height:100%;background:var(--sinal);width:0;transition:width .2s}
+  .barra.q i{background:#6FC08F}
+
+  main{max-width:680px;margin:0 auto;padding:16px 14px 96px}
+  .titulo{font-size:1.2rem;font-weight:600;margin:6px 0 4px}
+  .sub{font-size:.87rem;color:var(--fraca);margin:0 0 16px}
+  .seguranca{background:#F7EBE9;border-left:4px solid var(--alerta);padding:10px 12px;font-size:.85rem;margin:0 0 14px}
+  .seguranca b{display:block;margin-bottom:2px}
+  .recuperado{background:#FAF3E0;border-left:4px solid var(--sinal);padding:8px 12px;font-size:.84rem;margin:0 0 14px}
+  .intro{background:#fff;border:1px solid var(--aco);padding:10px 12px;font-size:.85rem;margin:0 0 12px;color:var(--fraca)}
+  .intro b{color:var(--tinta)}
+
+  .urg{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--aco);border-left:6px solid var(--aco);padding:14px;margin-bottom:10px;cursor:pointer;border-radius:2px;color:var(--tinta);font:inherit}
+  .urg b{display:block;font-size:1rem;margin-bottom:2px}
+  .urg span{font-size:.84rem;color:var(--fraca)}
+  .urg.r{border-left-color:var(--alerta)} .urg.a{border-left-color:var(--sinal)} .urg.v{border-left-color:var(--ok)}
+  .urg.sel{outline:3px solid var(--azul-2);background:#F5F8FB}
+
+  .divisor{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
+  .divisor span{font-size:.75rem;font-weight:600;color:var(--azul-2);white-space:nowrap}
+  .divisor i{flex:1;height:1px;background:var(--aco)}
+  .p{background:#fff;border:1px solid var(--aco);border-left:3px solid var(--azul-2);padding:14px;margin-bottom:11px;scroll-margin-top:110px}
+  .p.opcional{border-left-color:#8FB3DA}
+  .p.aprof{border-left-color:var(--sinal);background:#FFFDF6;margin-left:14px}
+  .p.aprof h2::before{content:"↳ ";color:var(--sinal)}
+  .p.foco{animation:foco 1.4s ease-out}
+  @keyframes foco{0%{box-shadow:0 0 0 4px var(--sinal)}100%{box-shadow:0 0 0 0 transparent}}
+  .p h2{margin:0 0 5px;font-size:1rem;font-weight:600;line-height:1.35}
+  .p h2 small{font-weight:400;color:var(--fraca);font-size:.76rem}
+  .ajuda{margin:0 0 10px;font-size:.83rem;color:var(--fraca)}
+  .pq{margin:-4px 0 10px;font-size:.78rem;color:var(--azul-2);font-style:italic}
+  textarea,input,select{width:100%;padding:10px;font:inherit;font-size:1rem;border:1px solid var(--aco);background:#FCFDFE;color:var(--tinta);border-radius:2px}
+  textarea{min-height:80px;resize:vertical}
+  textarea:focus,input:focus,select:focus{outline:3px solid var(--sinal);border-color:var(--azul-2)}
+  .lin{display:flex;gap:8px;flex-wrap:wrap}
+  .lin>div{flex:1 1 130px;min-width:0}
+  label.mini-l{display:block;font-size:.79rem;font-weight:600;margin:9px 0 3px}
+  .lin label.mini-l{margin-top:0}
+  .exemplo{margin-top:9px;background:#F5F8FB;border-left:3px solid var(--azul-2);padding:8px 10px;font-size:.82rem;color:var(--fraca)}
+  .exemplo b{color:var(--tinta);font-weight:600;display:block;margin-bottom:2px;font-size:.75rem}
+  .guia{margin:0 0 10px;padding:0;list-style:none;font-size:.82rem;color:var(--fraca)}
+  .guia li{padding-left:16px;position:relative;margin-bottom:2px}
+  .guia li::before{content:"?";position:absolute;left:0;color:var(--sinal);font-weight:700}
+  .dica{margin-top:9px;background:#FAF3E0;border-left:3px solid var(--sinal);padding:8px 10px;font-size:.83rem}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font:inherit;font-size:.88rem;padding:9px 12px;border:1px solid var(--aco);background:#fff;color:var(--tinta);border-radius:18px;cursor:pointer}
+  .chip.sel{background:var(--azul-2);border-color:var(--azul-2);color:#fff}
+  .chip.sis{border-radius:2px;flex:1 1 45%;text-align:left;padding:11px 12px}
+
+  button{font:inherit}
+  button:focus-visible{outline:3px solid var(--sinal);outline-offset:2px}
+  .rodape{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--aco);padding:9px 12px;display:flex;gap:8px;justify-content:center;z-index:10}
+  .rodape button{flex:1 1 0;max-width:210px;font-size:.9rem;padding:11px 8px;border:1px solid var(--azul);background:var(--azul);color:#fff;border-radius:2px;cursor:pointer}
+  .rodape button.claro{background:#fff;color:var(--azul)}
+  .rodape button.zap{background:var(--zap);border-color:var(--zap)}
+
+  .painel{font-size:.84rem;background:#fff;border:1px solid var(--aco);padding:9px 12px;margin-bottom:10px}
+  #faltam{border-left:3px solid var(--alerta)}
+  #melhorar{border-left:3px solid var(--sinal)}
+  .painel ul{margin:6px 0 0;padding:0;list-style:none}
+  .painel li{margin-bottom:4px}
+  .painel li button{background:none;border:0;padding:2px 0;color:var(--azul-2);text-decoration:underline;cursor:pointer;text-align:left;font-size:.84rem}
+  .msg{background:#E7F6EC;border:1px solid #BFE3CB;border-radius:6px;padding:12px;white-space:pre-wrap;word-wrap:break-word;font-size:.9rem;line-height:1.5}
+  .acoesMsg{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .acoesMsg button{flex:1 1 140px;padding:11px;border:1px solid var(--azul);background:#fff;color:var(--azul);border-radius:2px;cursor:pointer;font-size:.9rem}
+  .acoesMsg button.zap{background:var(--zap);border-color:var(--zap);color:#fff}
+  .nota{font-size:.8rem;color:var(--fraca);margin-top:10px}
+</style>
+</head>
+<body>
+
+<div id="topo">
+  <div class="t"><h1>Suporte Remoto — Elétrica e Automação</h1></div>
+  <div class="medidores">
+    <div><div class="rot"><span>Obrigatórios</span><b id="pct">0%</b></div><div class="barra"><i id="barra"></i></div></div>
+    <div><div class="rot"><span>Detalhe do relato</span><b id="qual">—</b></div><div class="barra q"><i id="barraQ"></i></div></div>
+  </div>
+</div>
+
+<main id="app"></main>
+
+<div class="rodape">
+  <button type="button" onclick="irMensagem()">Ver mensagem</button>
+  <button type="button" class="zap" onclick="compartilhar()">Enviar</button>
+  <button type="button" class="claro" id="btNovo" onclick="pedirNovo()">Novo</button>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const escH = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CHAVE = 'suporteRemotoEletrica_rascunho';
+
+const EMBARCACOES = ['Alcatraz','Atobá','Batuíra','Biguá','Cormoran','Fragata','Fulmar','Gaivota','Larus','Mandrião','Ostreiro','Pardela','Pelicano','Petrel','Pinguim','Prion','Skua','Sterna','Tagaz','Talha-Mar','Torda','Zarapito'];
+
+const URG = {
+  r:{emoji:'🔴', nome:'Parada / restrição', t:'Embarcação parada ou com restrição', d:'Equipamento essencial parado, perda de redundância, operação suspensa ou limitada.'},
+  a:{emoji:'🟡', nome:'Operando com falha', t:'Operando, mas com falha ou alarme', d:'A embarcação segue operando, mas algo falhou, está alarmando ou funcionando mal.'},
+  v:{emoji:'🟢', nome:'Pode esperar', t:'Pode esperar', d:'Dúvida, anormalidade leve ou algo para programar na próxima ida a bordo.'}
+};
+
+/* Perguntas específicas por sistema.
+   tipo: input | select | chips (várias) | chips1 (uma) | leituras (grupo de medições)
+   r = rótulo curto na mensagem; opc = não obrigatório (conta para o detalhe); pq = por que perguntamos */
+const SIS = {
+  ger:{n:'Geração / QEP', ph:'Ex.: DG2 — painel do AVR no QEP', ex:[
+    {k:'g_qual', r:'Gerador', t:'Qual gerador ou disjuntor?', tipo:'input', ph:'Ex.: DG2, disjuntor principal do DG2'},
+    {k:'g_barra', r:'Na barra', t:'Ele estava na barra quando falhou?', tipo:'select', op:['','Sim, em paralelo com outros','Sim, sozinho na barra','Não, fora da barra','Durante a partida ou o sincronismo']},
+    {k:'g_outros', r:'Efeito na planta', t:'O que aconteceu com o resto da planta?', tipo:'chips1', op:['Outros DGs seguraram a carga','Blackout total','Perda de um barramento','Consumidores desligados (load shedding)','Nada mudou']},
+    {k:'g_rele', r:'Relé / AVR', t:'O relé de proteção ou o AVR mostra alguma indicação?', tipo:'input', ph:'Ex.: LED "Trip" aceso no relé; código 32 no display', opc:true, pq:'O relé normalmente registra qual proteção atuou. Isso separa falha mecânica de falha elétrica.'},
+    {k:'g_lei', r:'Leituras', t:'Leituras do gerador (antes da falha ou agora)', tipo:'leituras', opc:true, pq:'Com tensão, frequência e carga dá para ver se foi sobrecarga, divisão de carga ou excitação.', campos:[
+      {k:'g_v', l:'Tensão', u:'V', ph:'440'}, {k:'g_hz', l:'Frequência', u:'Hz', ph:'60'}, {k:'g_kw', l:'Carga', u:'kW', ph:'450'}, {k:'g_a', l:'Corrente', u:'A', ph:'700'}, {k:'g_fp', l:'Fator de potência / kVAr', u:'', ph:'0,85'}]}
+  ]},
+  azi:{n:'Propulsão azimutal', ph:'Ex.: Azimutal BB — ESU 1', ex:[
+    {k:'a_qual', r:'Propulsor', t:'Qual propulsor?', tipo:'chips1', op:['BB','BE','Ambos']},
+    {k:'a_falha', r:'O que falha', t:'O que está falhando?', tipo:'chips', op:['Steering (giro)','Pitch / rotação','Partida do motor','Bomba hidráulica','ESU / inversor','Manete / comando','Indicação errada']},
+    {k:'a_modo', r:'Modo de comando', t:'Em qual modo de comando falha?', tipo:'chips', op:['Remoto (manete)','Local','Backup / NFU','DP','Todos']},
+    {k:'a_resp', r:'Comando x resposta', t:'Quando você comanda, o que acontece?', tipo:'chips1', op:['Não responde nada','Responde com atraso ou oscila','Responde, mas a indicação está errada','Vai para o lado errado','Responde normalmente, a falha é outra'], pq:'Isso separa problema no comando (manete, cabo, placa) de problema no atuador (hidráulica, motor).'},
+    {k:'a_lei', r:'Leituras', t:'Leituras disponíveis', tipo:'leituras', opc:true, campos:[
+      {k:'a_ang', l:'Ângulo comandado × real', u:'', ph:'30° × 12°'}, {k:'a_rpm', l:'Rotação', u:'rpm', ph:''}, {k:'a_bar', l:'Pressão hidráulica', u:'bar', ph:''}, {k:'a_amp', l:'Corrente do motor', u:'A', ph:''}]}
+  ]},
+  bow:{n:'Bow / Stern thruster', ph:'Ex.: Bow thruster de vante — softstarter', ex:[
+    {k:'b_qual', r:'Propulsor', t:'Qual propulsor lateral?', tipo:'chips1', op:['Bow de vante','Bow de ré','Stern','Todos']},
+    {k:'b_falha', r:'O que falha', t:'O que está falhando?', tipo:'chips', op:['Não parte','Desarma em operação','Pitch não responde','Softstarter em falha','Bomba hidráulica','Indicação errada']},
+    {k:'b_modo', r:'Modo de comando', t:'Em qual modo de comando falha?', tipo:'chips', op:['Remoto (console)','Local','DP','Todos']},
+    {k:'b_quando', r:'Momento da falha', t:'Em que momento a falha aparece?', tipo:'chips1', op:['Na partida','Logo após partir','Com carga alta','Em qualquer carga','Ao parar'], pq:'Falha na partida aponta para partida/softstarter; com carga alta, para proteção térmica ou sobrecorrente.'},
+    {k:'b_lei', r:'Leituras', t:'Leituras disponíveis', tipo:'leituras', opc:true, campos:[
+      {k:'b_amp', l:'Corrente do motor', u:'A', ph:''}, {k:'b_pitch', l:'Pitch comandado × real', u:'', ph:'50% × 0%'}, {k:'b_bar', l:'Pressão hidráulica', u:'bar', ph:''}]}
+  ]},
+  dp:{n:'DP e referências', ph:'Ex.: DGPS 1 / OS 2 do DP', ex:[
+    {k:'d_ref', r:'Afetado', t:'O que está afetado?', tipo:'chips', op:['DGPS 1','DGPS 2','Giro','MRU / VRS','Anemômetro','Radius','Cyscan','RadaScan','Fanbeam','HiPAP','Controladora RCU','Estação OS','C-Joy']},
+    {k:'d_modo', r:'Modo do DP', t:'Em qual modo o DP estava?', tipo:'select', op:['','Standby','Joystick','Auto position','Auto track / outro modo','Não estava em uso']},
+    {k:'d_efeito', r:'Efeito na posição', t:'Houve efeito na posição ou no aproamento?', tipo:'chips1', op:['Nenhum efeito','Pequeno desvio, recuperou sozinho','Desvio grande','Perda de posição','Saiu do DP / passou para manual']},
+    {k:'d_msg', r:'Mensagem na event list', t:'Qual mensagem aparece na event list?', tipo:'input', ph:'Copie exatamente como está na tela', opc:true, pq:'A event list mostra a sequência exata: qual sinal caiu primeiro e o que veio depois.'},
+    {k:'d_rest', r:'Referências restantes', t:'Quantas referências de posição continuam ativas e quais?', tipo:'input', ph:'Ex.: 2 — DGPS 2 e Cyscan', opc:true},
+    {k:'d_lei', r:'Leituras', t:'Desvios registrados', tipo:'leituras', opc:true, campos:[
+      {k:'d_m', l:'Desvio de posição', u:'m', ph:''}, {k:'d_hdg', l:'Desvio de aproamento', u:'°', ph:''}]}
+  ]},
+  nav:{n:'Navegação / comunicação', ph:'Ex.: Radar banda X do console de vante', ex:[
+    {k:'n_eq', r:'Equipamento', t:'Qual equipamento?', tipo:'chips', op:['Radar','ECDIS','AIS','VHF','GPS de navegação','Giro','Ecobatímetro','Speed log','Fonoclama / alarme geral','Telefonia','Outro']},
+    {k:'n_sint', r:'Sintoma', t:'Como a falha aparece?', tipo:'chips', op:['Não liga','Tela apagada ou travada','Sem sinal / sem dados','Leitura errada','Sem áudio / sem transmissão','Alarme contínuo']},
+    {k:'n_outros', r:'Outros equipamentos', t:'Outros equipamentos que recebem o mesmo sinal também falharam?', tipo:'chips1', op:['Sim, outros também','Não, só este','Não sei'], pq:'Se vários falham juntos, a causa costuma ser a fonte do sinal (giro, GPS) ou a rede, e não o equipamento em si.'}
+  ]},
+  aut:{n:'Automação / Praxis', ph:'Ex.: Praxis — tela de tanques, DPU 3', ex:[
+    {k:'u_tela', r:'Tela / grupo', t:'Em qual tela ou grupo do Praxis?', tipo:'input', ph:'Ex.: Tanques, Geradores, Sistema de carga'},
+    {k:'u_tipo', r:'Tipo de falha', t:'Que tipo de falha?', tipo:'chips', op:['Leitura errada','Comando não responde','Alarme falso ou repetitivo','Sensor com falha (sense fail)','Tela travada','Sem comunicação']},
+    {k:'u_comp', r:'Praxis × local', t:'Compare: o que o Praxis mostra e o que o instrumento local mostra?', tipo:'input', ph:'Ex.: Praxis 0 bar, manômetro local 4 bar', opc:true, pq:'Se o local está certo e o Praxis errado, o problema está no sensor, no cabo ou no módulo, não no processo.'},
+    {k:'u_estacoes', r:'Outras estações', t:'Acontece em todas as estações ou só em uma?', tipo:'chips1', op:['Em todas','Só em uma estação','Não verificado'], opc:true}
+  ]},
+  bat:{n:'Baterias / UPS / 24 V', ph:'Ex.: UPS do DP 1 / carregador 24 V do QEE', ex:[
+    {k:'t_sist', r:'Sistema', t:'Qual sistema?', tipo:'chips', op:['24 V geral','UPS do DP','UPS de navegação','Carregador de baterias','Baterias de partida','Sistema de incêndio / porta estanque']},
+    {k:'t_ind', r:'Indicação no painel', t:'O que o painel do carregador ou da UPS indica?', tipo:'chips', op:['Em bateria (sem entrada)','Falha no carregador','Bateria baixa','Fuga à terra','Sobretemperatura','Sem indicação / apagado'], opc:true},
+    {k:'t_lei', r:'Leituras', t:'Leituras disponíveis', tipo:'leituras', opc:true, pq:'A tensão da bateria e a corrente de carga mostram se o problema é o carregador ou as baterias.', campos:[
+      {k:'t_v', l:'Tensão da bateria', u:'Vcc', ph:'24,5'}, {k:'t_a', l:'Corrente de carga', u:'A', ph:''}, {k:'t_vin', l:'Tensão de entrada', u:'Vca', ph:'230'}]}
+  ]},
+  ilu:{n:'Iluminação / tomadas', ph:'Ex.: Iluminação do convés principal, BB', ex:[
+    {k:'i_local', r:'Local', t:'Onde?', tipo:'input', ph:'Ex.: Convés principal, BB; camarote 2'},
+    {k:'i_qtd', r:'Pontos afetados', t:'Quantos pontos estão afetados?', tipo:'chips1', op:['Um ponto','Alguns pontos','Todo o compartimento']},
+    {k:'i_disj', r:'Disjuntor', t:'O disjuntor do circuito está desarmado?', tipo:'chips1', op:['Sim','Não','Não sei qual é'], opc:true},
+    {k:'i_agua', r:'Exposição', t:'O local tem exposição a água ou umidade?', tipo:'chips1', op:['Sim, área externa ou molhada','Não, área seca'], opc:true, pq:'Umidade é a causa mais comum de desarme em circuitos externos.'}
+  ]},
+  out:{n:'Outro', ph:'Ex.: Guindaste — painel da bomba hidráulica', ex:[]}
+};
+
+const ANTES = ['Operação normal, sem mudança','Partida do equipamento','Aumento de carga ou manobra','Troca de modo de comando','Troca de gerador / sincronismo','Manutenção em andamento','Mar grosso / mau tempo'];
+const SINAIS = ['Cheiro de queimado','Fumaça','Faísca / estalo','Ruído diferente','Vibração','Aquecimento','Luzes piscaram','Nenhum sinal físico'];
+const MUDANCAS = ['Manutenção recente','Troca de peça','Blackout recente','Lavagem / entrada de água','Mudança de software ou ajuste','Equipamento parado muito tempo','Nenhuma mudança que eu saiba'];
+const HIST = ['Primeira vez','Já aconteceu antes','Não sei'];
+const PADRAO = ['Com carga alta','Com mar grosso','Ao partir outro equipamento','Em horário específico','Com equipamento quente','Sem padrão'];
+const FEITO = ['Reconheceu / resetou o alarme','Rearmou disjuntor','Desligou e religou o equipamento','Passou para o equipamento reserva','Mudou o modo de comando','Nada ainda'];
+const RES_RESET = ['O alarme voltou logo','O alarme voltou depois de um tempo','Não voltou até agora'];
+const RES_RESERVA = ['Reserva funcionou normalmente','Reserva também falhou','Reserva com limitação'];
+const RES_RELIGA = ['Voltou a funcionar','Voltou e falhou de novo','Não voltou'];
+const EVID = ['Foto da tela de alarme','Foto da plaqueta / TAG','Foto do painel','Vídeo do ruído ou da falha','Foto do instrumento com a leitura','Foto da event list / histórico de alarmes'];
+const CONDICAO = ['','Atracada','Fundeada','Navegando','Em DP na locação','Em operação de carga'];
+const SITUACAO = ['','Parado, sem reserva disponível','Parado, operando com o reserva','Funcionando com restrição','Funcionando normalmente, mas a falha pode voltar'];
+const REDUND = ['','Sem perda de redundância','Redundância perdida','Não se aplica / não sei'];
+const JANELA = ['','Pode parar o equipamento a qualquer momento','Só com a embarcação atracada ou fundeada','Precisa combinar com o comandante','Não pode parar agora'];
+const FREQ = ['','Contínuo, está acontecendo agora','Intermitente, vai e volta','Aconteceu uma vez'];
+const EXCLUSIVO = /^(Nada ainda|Nenhum|Nenhuma|Sem padrão|Operação normal)/;
+
+const VAGOS = ['deu problema','nao funciona','não funciona','com defeito','deu pau','parou','problema','falha','pifou','quebrou'];
+const vago = t => { const s = t.toLowerCase().trim(); return s.length < 40 && VAGOS.some(x => s.includes(x)); };
+
+function agoraLocal(d){
+  d = d || new Date();
+  const z = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`;
+}
+function novoEstado(){
+  return {criado:agoraLocal(), urg:'', emb:'', nome:'', funcao:'', contato:'', condicao:'', sis:'', equip:'',
+    oque:'', antes:[], antesDet:'', sinais:[], sinaisOnde:'', continua:'',
+    alarme:'', semAlarme:false, quando:agoraLocal(), freq:'', vezes:'', padrao:[],
+    mudancas:[], mudDet:'', hist:'', histDet:'',
+    feito:[], rearmeQtd:'', rearmeTempo:'', resetRes:'', reservaRes:'', religaRes:'', feitoDet:'',
+    situacao:'', red:'', janela:'', evid:[], extra:{}};
+}
+let R = novoEstado();
+let recuperado = false;
+try{
+  const s = localStorage.getItem(CHAVE);
+  if(s){ const o = JSON.parse(s); if(o && o.criado){ R = Object.assign(novoEstado(), o); recuperado = !!(o.urg || o.oque || o.emb); } }
+}catch(e){}
+function salva(){ try{ localStorage.setItem(CHAVE, JSON.stringify(R)); }catch(e){} }
+
+/* ---------- montagem ---------- */
+function sel(k, ops, val, x){
+  return `<select data-${x?'x':'k'}="${k}">` + ops.map(o => `<option value="${escH(o)}"${o===val?' selected':''}>${o ? escH(o) : 'Selecione'}</option>`).join('') + `</select>`;
+}
+function chips(k, ops, vals, unico, grupo){
+  return `<div class="chips">` + ops.map(o => {
+    const on = unico ? vals === o : (vals || []).includes(o);
+    return `<button type="button" class="chip${on?' sel':''}" data-chip="${k}" data-v="${escH(o)}" data-u="${unico?1:0}" data-g="${grupo||''}">${escH(o)}</button>`;
+  }).join('') + `</div>`;
+}
+function inp(k, val, ph, x){ return `<input data-${x?'x':'k'}="${k}" value="${escH(val||'')}" placeholder="${escH(ph||'')}">`; }
+/* bloco: {id, t, aj, pq, campo, extra, opc, aprof, se} */
+function bloco(o){
+  const cls = 'p' + (o.opc ? ' opcional' : '') + (o.aprof ? ' aprof' : '') + (o.se ? ' oculto' : '');
+  return `<div class="${cls}" id="p_${o.id}"${o.se?` data-se="${o.se}"`:''}><h2>${o.t}${o.opc?' <small>(ajuda no diagnóstico)</small>':''}</h2>`
+    + (o.aj ? `<p class="ajuda">${o.aj}</p>` : '') + (o.pq ? `<p class="pq">Por que perguntamos: ${o.pq}</p>` : '')
+    + o.campo + (o.extra||'') + `<div class="dica oculto" id="d_${o.id}"></div></div>`;
+}
+const div = t => `<div class="divisor"><span>${t}</span><i></i></div>`;
+
+function monta(){
+  let h = '';
+  if(recuperado) h += `<div class="recuperado">Rascunho recuperado. Continue de onde parou ou toque em <b>Novo</b> para começar outro chamado.</div>`;
+  h += `<p class="titulo">Qual a situação da embarcação?</p><p class="sub">Escolha uma opção. Ela define a prioridade do chamado.</p>`;
+  h += ['r','a','v'].map(k => `<button type="button" class="urg ${k}${R.urg===k?' sel':''}" data-urg="${k}"><b>${URG[k].emoji} ${URG[k].t}</b><span>${URG[k].d}</span></button>`).join('');
+
+  h += `<div id="resto"${R.urg ? '' : ' class="oculto"'}>`;
+  h += `<div class="seguranca"><b>Antes de mexer em qualquer coisa</b>Não abra painel energizado. Nenhuma intervenção sem PT e LOTO. Não rearme a mesma proteção mais de uma vez sem falar com a elétrica.</div>`;
+  h += `<div class="intro">Quanto mais detalhe, mais rápido o diagnóstico e menos ligações de volta. Pense que o técnico <b>não está vendo o que você vê</b>: conte como se fosse explicar por telefone.</div>`;
+
+  h += div('QUEM ESTÁ PEDINDO');
+  h += bloco({id:'emb', t:'Qual embarcação?',
+    campo:`<input data-k="emb" list="lsEmb" autocomplete="off" value="${escH(R.emb)}" placeholder="Nome da embarcação"><datalist id="lsEmb">${EMBARCACOES.map(e=>`<option>${e}</option>`).join('')}</datalist>`});
+  h += bloco({id:'nome', t:'Quem está reportando?', aj:'Nome e função.',
+    campo:`<div class="lin"><div><label class="mini-l">Nome</label>${inp('nome',R.nome,'Ex.: Silva')}</div>
+     <div><label class="mini-l">Função</label>${inp('funcao',R.funcao,'Ex.: CFM, 1º OFM')}</div></div>`});
+  h += bloco({id:'contato', t:'Contato a bordo', opc:true, pq:'Às vezes uma ligação de 2 minutos resolve o que levaria 20 mensagens.', campo:inp('contato',R.contato,'Telefone, ramal ou satélite')});
+  h += bloco({id:'condicao', t:'Onde a embarcação está agora?', campo:sel('condicao', CONDICAO, R.condicao)});
+
+  h += div('O EQUIPAMENTO');
+  h += bloco({id:'sis', t:'Qual sistema?',
+    campo:`<div class="chips">` + Object.keys(SIS).map(k => `<button type="button" class="chip sis${R.sis===k?' sel':''}" data-sis="${k}">${SIS[k].n}</button>`).join('') + `</div>`});
+  h += bloco({id:'equip', t:'Qual equipamento, exatamente?', aj:'Nome e TAG como estão na plaqueta ou no painel. Se não achar o TAG, diga onde o equipamento fica.',
+    campo:`<input data-k="equip" id="inEquip" value="${escH(R.equip)}" placeholder="${escH(R.sis ? SIS[R.sis].ph : 'Ex.: DG2 — painel AVR')}">`});
+  h += `<div id="extras"></div>`;
+
+  h += div('O QUE ACONTECEU — CONTE EM MOMENTOS');
+  h += bloco({id:'oque', t:'Em poucas palavras, qual é o problema?', aj:'Um resumo de uma ou duas frases. Os detalhes vêm nas próximas perguntas.',
+    campo:`<textarea data-k="oque" placeholder="Descreva com suas palavras">${escH(R.oque)}</textarea>`,
+    extra:`<div class="exemplo"><b>Exemplo</b>O DG2 saiu da barra sozinho durante a operação, o disjuntor abriu e ele não sincroniza de novo.</div>`});
+  h += bloco({id:'antes', t:'1. ANTES — o que estava acontecendo quando a falha apareceu?', pq:'Muitas falhas só aparecem em uma condição específica: partida, carga alta, troca de modo.',
+    campo:chips('antes', ANTES, R.antes, false) + `<label class="mini-l">Detalhe</label>` + inp('antesDet', R.antesDet, 'Ex.: estávamos partindo o bow de vante para manobra')});
+  h += bloco({id:'sinais', t:'2. NA HORA — você viu, ouviu ou sentiu alguma coisa?', aj:'Marque tudo o que percebeu, mesmo que pareça sem importância.',
+    campo:chips('sinais', SINAIS, R.sinais, false)});
+  h += bloco({id:'sinaisOnde', t:'Onde exatamente você percebeu isso?', aprof:true, se:'sinaisOnde', pq:'O local do cheiro, do ruído ou do calor aponta direto para o componente com defeito.',
+    campo:inp('sinaisOnde', R.sinaisOnde, 'Ex.: cheiro de queimado no painel do softstarter, gaveta 3')});
+  h += bloco({id:'continua', t:'3. DEPOIS — o que parou e o que continua funcionando?', opc:true,
+    pq:'Saber o que continua funcionando elimina metade das causas possíveis.',
+    campo:`<ul class="guia"><li>Só esse equipamento parou, ou outros junto?</li><li>A alimentação chega (tem luz, tela acesa)?</li><li>Funciona em algum modo e não em outro?</li></ul>
+      <textarea data-k="continua" placeholder="Ex.: o azimutal BB parou; o BE e os bows seguem normais. A tela da ESU continua acesa.">${escH(R.continua)}</textarea>`});
+  h += bloco({id:'alarme', t:'Qual alarme aparece?', aj:'Copie o texto exatamente como está na tela, com o código se houver. Se aparecerem vários, informe todos, na ordem em que surgiram.',
+    campo:`<textarea data-k="alarme" style="min-height:60px" placeholder='Ex.: 13:10 "REVERSE POWER TRIP"; 13:10 "DG2 CB OPEN"'>${escH(R.alarme)}</textarea>
+     <div class="chips" style="margin-top:8px"><button type="button" class="chip${R.semAlarme?' sel':''}" id="btSemAlarme">Não há alarme na tela</button></div>`});
+
+  h += div('QUANDO E COM QUE FREQUÊNCIA');
+  h += bloco({id:'quando', t:'Quando começou e com que frequência?',
+    campo:`<div class="lin"><div><label class="mini-l">Começou em</label><input type="datetime-local" data-k="quando" value="${escH(R.quando)}"></div>
+     <div><label class="mini-l">Frequência</label>${sel('freq', FREQ, R.freq)}</div></div>`});
+  h += bloco({id:'padrao', t:'Falha que vai e volta: quantas vezes e em que situação?', aprof:true, se:'intermitente',
+    pq:'Falha intermitente quase sempre tem um gatilho. Achar o padrão é meio caminho para achar a causa.',
+    campo:`<label class="mini-l" style="margin-top:0">Quantas vezes nas últimas 24 h?</label>${inp('vezes', R.vezes, 'Ex.: 4 vezes')}
+      <label class="mini-l">Parece acontecer…</label>` + chips('padrao', PADRAO, R.padrao, false)});
+  h += bloco({id:'hist', t:'Isso já aconteceu antes nesta embarcação?', campo:chips('hist', HIST, R.hist, true)});
+  h += bloco({id:'histDet', t:'Quando foi e o que resolveu da outra vez?', aprof:true, se:'historico',
+    pq:'Se a mesma falha voltou, a correção anterior pode ter tratado o sintoma e não a causa.',
+    campo:inp('histDet', R.histDet, 'Ex.: em julho; trocaram o fusível do AVR e voltou a funcionar')});
+  h += bloco({id:'mudancas', t:'Houve alguma mudança recente?', opc:true, aj:'Nos últimos dias, antes da falha.',
+    pq:'Uma parte grande das falhas aparece logo depois de manutenção, troca de peça ou blackout.',
+    campo:chips('mudancas', MUDANCAS, R.mudancas, false) + `<label class="mini-l">Detalhe</label>` + inp('mudDet', R.mudDet, 'Ex.: troca do contator K3 ontem pela equipe de bordo')});
+
+  h += div('O QUE JÁ FOI FEITO');
+  h += bloco({id:'feito', t:'O que já foi feito a bordo?', aj:'Marque tudo o que foi tentado. Isso evita repetir passos e mostra o que já foi descartado.',
+    campo:chips('feito', FEITO, R.feito, false)});
+  h += bloco({id:'rearme', t:'Sobre o rearme do disjuntor', aprof:true, se:'rearme',
+    pq:'Desarme imediato indica curto; desarme após minutos indica sobrecarga ou aquecimento.',
+    campo:`<div class="lin"><div><label class="mini-l">Quantas vezes rearmou?</label>${inp('rearmeQtd', R.rearmeQtd, 'Ex.: 1')}</div>
+      <div><label class="mini-l">Desarmou de novo depois de quanto tempo?</label>${inp('rearmeTempo', R.rearmeTempo, 'Ex.: na hora / 10 min / não desarmou')}</div></div>`});
+  h += bloco({id:'resetRes', t:'Depois do reset, o alarme voltou?', aprof:true, se:'reset', campo:chips('resetRes', RES_RESET, R.resetRes, true)});
+  h += bloco({id:'religaRes', t:'Depois de desligar e religar, o que aconteceu?', aprof:true, se:'religa', campo:chips('religaRes', RES_RELIGA, R.religaRes, true)});
+  h += bloco({id:'reservaRes', t:'E o equipamento reserva?', aprof:true, se:'reserva',
+    pq:'Se o reserva também falha, a causa pode estar em algo comum aos dois (alimentação, comando, sensor).',
+    campo:chips('reservaRes', RES_RESERVA, R.reservaRes, true)});
+  h += bloco({id:'feitoDet', t:'Mais algum detalhe sobre o que foi feito?', opc:true, campo:inp('feitoDet', R.feitoDet, 'Ex.: medimos 440 V na entrada do painel')});
+
+  h += div('SITUAÇÃO AGORA');
+  h += bloco({id:'situacao', t:'Como o equipamento está agora?', campo:sel('situacao', SITUACAO, R.situacao)});
+  h += bloco({id:'red', t:'Houve perda de redundância?', opc:true, aj:'Principalmente para geração, propulsão e DP.', campo:sel('red', REDUND, R.red)});
+  h += bloco({id:'janela', t:'Quando dá para parar o equipamento?', opc:true, aj:'A elétrica pode precisar desligar ou bloquear para testar.', campo:sel('janela', JANELA, R.janela)});
+  h += bloco({id:'evid', t:'O que você vai enviar junto?', opc:true, aj:'Marque e mande logo depois da mensagem.',
+    pq:'Uma foto da tela de alarme ou da event list evita erro de digitação e mostra a sequência dos eventos.',
+    campo:chips('evid', EVID, R.evid, false)});
+
+  h += div('MENSAGEM PARA O GRUPO') + `
+    <div id="faltam" class="painel"></div>
+    <div id="melhorar" class="painel"></div>
+    <div class="msg" id="msg"></div>
+    <div class="acoesMsg">
+      <button type="button" onclick="copiar()">Copiar mensagem</button>
+      <button type="button" class="zap" onclick="compartilhar()">Enviar no WhatsApp</button>
+    </div>
+    <p class="nota">Enviar abre o menu do celular para escolher o grupo. No computador, use Copiar e cole no WhatsApp Web. O rascunho fica salvo neste aparelho até você tocar em Novo.</p>
+    <p class="nota" id="statusReg"></p>`;
+  h += `</div>`;
+
+  $('app').innerHTML = h;
+  montaExtras();
+  atualiza();
+}
+function montaExtras(){
+  const box = $('extras'); if(!box) return;
+  if(!R.sis){ box.innerHTML = ''; return; }
+  box.innerHTML = SIS[R.sis].ex.map(q => {
+    const v = R.extra[q.k];
+    let campo;
+    if(q.tipo === 'input') campo = inp(q.k, v, q.ph, true);
+    else if(q.tipo === 'select') campo = sel(q.k, q.op, v || '', true);
+    else if(q.tipo === 'leituras') campo = `<p class="ajuda">Preencha só o que conseguir ler no painel ou no instrumento.</p><div class="lin">` +
+      q.campos.map(c => `<div><label class="mini-l">${escH(c.l)}${c.u?' ('+c.u+')':''}</label>${inp(c.k, R.extra[c.k], c.ph, true)}</div>`).join('') + `</div>`;
+    else campo = chips(q.k, q.op, v || (q.tipo==='chips1' ? '' : []), q.tipo === 'chips1', 'x');
+    return bloco({id:'x_'+q.k, t:q.t, campo, opc:q.opc, pq:q.pq});
+  }).join('');
+  const inE = $('inEquip'); if(inE) inE.placeholder = SIS[R.sis].ph;
+}
+
+/* ---------- condições das perguntas de aprofundamento ---------- */
+const SE = {
+  sinaisOnde: () => R.sinais.some(s => s !== 'Nenhum sinal físico'),
+  intermitente: () => R.freq === 'Intermitente, vai e volta',
+  historico: () => R.hist === 'Já aconteceu antes',
+  rearme: () => R.feito.includes('Rearmou disjuntor'),
+  reset: () => R.feito.includes('Reconheceu / resetou o alarme'),
+  religa: () => R.feito.includes('Desligou e religou o equipamento'),
+  reserva: () => R.feito.includes('Passou para o equipamento reserva')
+};
+
+/* ---------- eventos ---------- */
+document.addEventListener('input', e => {
+  const t = e.target;
+  if(t.dataset.k){ R[t.dataset.k] = t.value; atualiza(); }
+  else if(t.dataset.x){ R.extra[t.dataset.x] = t.value; atualiza(); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if(t.tagName === 'SELECT'){
+    if(t.dataset.k) R[t.dataset.k] = t.value;
+    if(t.dataset.x) R.extra[t.dataset.x] = t.value;
+    atualiza();
+  }
+});
+document.addEventListener('click', e => {
+  const ir = e.target.closest('[data-ir]');
+  if(ir){ focar(ir.dataset.ir); return; }
+  const u = e.target.closest('[data-urg]');
+  if(u){
+    R.urg = u.dataset.urg;
+    document.querySelectorAll('[data-urg]').forEach(b => b.classList.toggle('sel', b === u));
+    $('resto').classList.remove('oculto');
+    atualiza(); return;
+  }
+  const s = e.target.closest('[data-sis]');
+  if(s){
+    if(R.sis !== s.dataset.sis){ R.sis = s.dataset.sis; R.extra = {}; }
+    document.querySelectorAll('[data-sis]').forEach(b => b.classList.toggle('sel', b === s));
+    montaExtras(); atualiza(); return;
+  }
+  const c = e.target.closest('[data-chip]');
+  if(c){
+    const k = c.dataset.chip, v = c.dataset.v, unico = c.dataset.u === '1', alvo = c.dataset.g === 'x' ? R.extra : R;
+    if(unico){
+      alvo[k] = alvo[k] === v ? '' : v;
+      c.parentElement.querySelectorAll('.chip').forEach(b => b.classList.toggle('sel', b.dataset.v === alvo[k]));
+    } else {
+      let arr = Array.isArray(alvo[k]) ? alvo[k] : [];
+      if(EXCLUSIVO.test(v)) arr = arr.includes(v) ? [] : [v];
+      else {
+        arr = arr.filter(x => !EXCLUSIVO.test(x));
+        arr = arr.includes(v) ? arr.filter(x => x !== v) : arr.concat(v);
+      }
+      alvo[k] = arr;
+      c.parentElement.querySelectorAll('.chip').forEach(b => b.classList.toggle('sel', arr.includes(b.dataset.v)));
+    }
+    atualiza(); return;
+  }
+  if(e.target.id === 'btSemAlarme'){
+    R.semAlarme = !R.semAlarme;
+    e.target.classList.toggle('sel', R.semAlarme);
+    atualiza();
+  }
+});
+function focar(id){
+  const el = $('p_' + id); if(!el) return;
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+  el.classList.remove('foco'); void el.offsetWidth; el.classList.add('foco');
+  const f = el.querySelector('textarea,input,select'); if(f) setTimeout(() => f.focus({preventScroll:true}), 400);
+}
+
+/* ---------- validação ---------- */
+function vazio(v){ return Array.isArray(v) ? !v.length : !String(v||'').trim(); }
+function pendencias(){
+  const f = [], add = (id, l) => f.push({id, l});
+  if(!R.urg) add('', 'Situação da embarcação');
+  if(vazio(R.emb)) add('emb','Embarcação');
+  if(vazio(R.nome)) add('nome','Quem está reportando');
+  if(vazio(R.condicao)) add('condicao','Onde a embarcação está');
+  if(!R.sis) add('sis','Sistema');
+  else SIS[R.sis].ex.forEach(q => { if(!q.opc && vazio(R.extra[q.k])) add('x_'+q.k, q.t.replace('?','')); });
+  if(vazio(R.equip)) add('equip','Equipamento');
+  if(vazio(R.oque) || R.oque.trim().length < 25 || vago(R.oque)) add('oque','Resumo do problema');
+  if(vazio(R.antes) && vazio(R.antesDet)) add('antes','O que estava acontecendo antes');
+  if(vazio(R.sinais)) add('sinais','O que você viu, ouviu ou sentiu');
+  if(vazio(R.alarme) && !R.semAlarme) add('alarme','Alarme (ou marque "Não há alarme")');
+  if(vazio(R.freq)) add('quando','Frequência');
+  if(vazio(R.hist)) add('hist','Já aconteceu antes?');
+  if(vazio(R.feito)) add('feito','O que já foi feito');
+  if(vazio(R.situacao)) add('situacao','Como o equipamento está agora');
+  return f;
+}
+/* Itens que não são obrigatórios, mas aprofundam o relato. */
+function melhorias(){
+  const m = [], add = (ok, id, l) => m.push({ok:!!ok, id, l});
+  if(SE.sinaisOnde()) add(R.sinaisOnde.trim(), 'sinaisOnde', 'Onde você percebeu o cheiro, ruído ou calor');
+  add(R.continua.trim().length >= 15, 'continua', 'O que parou e o que continua funcionando');
+  if(SE.intermitente()) add(R.vezes.trim() && R.padrao.length, 'padrao', 'Quantas vezes falhou e em que situação');
+  if(SE.historico()) add(R.histDet.trim(), 'histDet', 'Quando aconteceu antes e o que resolveu');
+  add(R.mudancas.length, 'mudancas', 'Mudanças recentes (manutenção, troca de peça, blackout)');
+  if(SE.rearme()) add(R.rearmeQtd.trim() && R.rearmeTempo.trim(), 'rearme', 'Quantas vezes rearmou e em quanto tempo desarmou');
+  if(SE.reset()) add(R.resetRes, 'resetRes', 'Se o alarme voltou depois do reset');
+  if(SE.religa()) add(R.religaRes, 'religaRes', 'O que aconteceu depois de religar');
+  if(SE.reserva()) add(R.reservaRes, 'reservaRes', 'Se o equipamento reserva funcionou');
+  if(R.sis) SIS[R.sis].ex.filter(q => q.opc).forEach(q => {
+    const ok = q.tipo === 'leituras' ? q.campos.some(c => !vazio(R.extra[c.k])) : !vazio(R.extra[q.k]);
+    add(ok, 'x_'+q.k, q.tipo === 'leituras' ? 'Pelo menos uma leitura do painel ou instrumento' : q.t.replace('?',''));
+  });
+  add(R.contato.trim(), 'contato', 'Contato a bordo');
+  add(R.red, 'red', 'Perda de redundância');
+  add(R.janela, 'janela', 'Quando dá para parar o equipamento');
+  add(R.evid.length, 'evid', 'Fotos ou vídeo que você vai enviar');
+  return m;
+}
+function dicas(){
+  const d = {};
+  const o = (R.oque||'').trim();
+  if(o && o.length < 25) d.oque = 'Está curto. Diga o que parou, o que apareceu na tela ou o que você percebeu.';
+  else if(o && vago(o)) d.oque = '“Deu problema” não ajuda a diagnosticar. Descreva o que você viu: desarmou, apagou, não parte, ruído, cheiro.';
+  const eq = (R.equip||'').trim();
+  if(eq && eq.length < 4) d.equip = 'Inclua o TAG ou onde o equipamento fica.';
+  const a = (R.alarme||'').trim();
+  if(a && a.length < 4) d.alarme = 'Copie o texto completo do alarme, não só uma parte.';
+  if(R.sinais.some(s => /queimado|Fumaça|Faísca/.test(s))) d.sinais = 'Cheiro de queimado, fumaça ou faísca: mantenha o equipamento desligado e isolado, e não rearme até falar com a elétrica.';
+  if(SE.rearme() && /^\s*([2-9]|\d{2,})/.test(R.rearmeQtd)) d.rearme = 'Não rearme de novo. Rearmes repetidos podem agravar o dano. Aguarde orientação.';
+  if(R.urg === 'r' && R.situacao === 'Funcionando normalmente, mas a falha pode voltar') d.situacao = 'Você marcou embarcação parada ou com restrição, mas o equipamento está funcionando normalmente. Confira a situação no topo.';
+  const cont = (R.continua||'').trim();
+  if(cont && cont.length < 15) d.continua = 'Diga também o que continua funcionando. Isso ajuda a descartar causas.';
+  return d;
+}
+
+/* ---------- mensagem ---------- */
+const semAcento = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'');
+function idChamado(){
+  const sig = semAcento(R.emb||'').replace(/^\s*(psv|ahts|osrv|rsv)\b[\s.-]*/i,'').replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase() || 'XXX';
+  const m = (R.criado||'').match(/^\d{2}(\d{2})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  return 'SR-' + sig + '-' + (m ? m[3]+m[2]+m[1]+'-'+m[4]+m[5] : '000000-0000');
+}
+const dh = s => { const m = (s||'').match(/^\d{4}-(\d{2})-(\d{2})T(\d{2}):(\d{2})/); return m ? `${m[2]}/${m[1]} ${m[3]}:${m[4]}` : ''; };
+const limpa = s => String(s||'').replace(/\s+/g,' ').trim().replace(/\*/g,'');
+const lista = v => Array.isArray(v) ? v.join(', ') : limpa(v);
+const junta = (...p) => p.filter(x => !vazio(x)).join(' — ');
+
+function mensagem(){
+  const u = URG[R.urg] || {emoji:'⚪', nome:'Prioridade não informada'};
+  const L = [], ln = (r, v) => { if(!vazio(v)) L.push(`*${r}:* ${v}`); };
+  L.push(`${u.emoji} *SUPORTE REMOTO — ${idChamado()}*`);
+  L.push([`*${limpa(R.emb) || 'Embarcação não informada'}*`, limpa(R.condicao), u.nome].filter(Boolean).join(' | '));
+  const quem = [limpa(R.nome), R.funcao && '(' + limpa(R.funcao) + ')'].filter(Boolean).join(' ');
+  if(quem || R.contato) L.push('Reporta: ' + (quem || '—') + (R.contato ? ' — ' + limpa(R.contato) : ''));
+
+  L.push('');
+  if(R.sis) ln('Sistema', SIS[R.sis].n);
+  ln('Equipamento', limpa(R.equip));
+  if(R.sis) SIS[R.sis].ex.forEach(q => {
+    if(q.tipo === 'leituras'){
+      const v = q.campos.filter(c => !vazio(R.extra[c.k])).map(c => `${c.l} ${limpa(R.extra[c.k])}${c.u?' '+c.u:''}`).join(' · ');
+      ln(q.r, v);
+    } else ln(q.r, lista(R.extra[q.k]));
+  });
+
+  L.push('');
+  ln('Problema', limpa(R.oque));
+  ln('Antes da falha', junta(lista(R.antes), limpa(R.antesDet)));
+  ln('Percebido na hora', junta(lista(R.sinais), limpa(R.sinaisOnde)));
+  ln('Parou / continua', limpa(R.continua));
+  if(R.alarme) ln('Alarme', `"${limpa(R.alarme)}"`);
+  else if(R.semAlarme) ln('Alarme', 'nenhum na tela');
+
+  L.push('');
+  ln('Desde', junta(dh(R.quando), R.freq && R.freq.toLowerCase()));
+  if(SE.intermitente()) ln('Padrão', junta(limpa(R.vezes) && limpa(R.vezes) + ' em 24 h', lista(R.padrao).toLowerCase()));
+  ln('Histórico', junta(R.hist, SE.historico() ? limpa(R.histDet) : ''));
+  ln('Mudanças recentes', junta(lista(R.mudancas), limpa(R.mudDet)));
+
+  if(R.feito.length){
+    L.push('');
+    L.push('*Já feito:*');
+    R.feito.forEach(f => {
+      let det = '';
+      if(f === 'Rearmou disjuntor') det = junta(R.rearmeQtd && limpa(R.rearmeQtd) + 'x', R.rearmeTempo && 'desarmou: ' + limpa(R.rearmeTempo));
+      if(f === 'Reconheceu / resetou o alarme') det = R.resetRes.toLowerCase();
+      if(f === 'Desligou e religou o equipamento') det = R.religaRes.toLowerCase();
+      if(f === 'Passou para o equipamento reserva') det = R.reservaRes.toLowerCase();
+      L.push('• ' + f + (det ? ' → ' + det : ''));
+    });
+    if(R.feitoDet) L.push('• ' + limpa(R.feitoDet));
+  }
+
+  L.push('');
+  ln('Situação', R.situacao);
+  ln('Redundância', R.red);
+  ln('Janela', R.janela);
+  if(R.evid.length){ L.push(''); L.push(`📷 A seguir: ${R.evid.join(', ').toLowerCase()}`); }
+  return L.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/* ---------- atualização ---------- */
+function atualiza(){
+  document.querySelectorAll('[data-se]').forEach(el => el.classList.toggle('oculto', !SE[el.dataset.se]()));
+
+  const f = pendencias();
+  const total = 15 + (R.sis ? SIS[R.sis].ex.filter(q => !q.opc).length : 0);
+  const pct = Math.max(0, Math.round((total - f.length) / total * 100));
+  $('pct').textContent = pct + '%'; $('barra').style.width = pct + '%';
+
+  const m = melhorias(), ok = m.filter(x => x.ok).length;
+  const q = m.length ? ok / m.length : 0;
+  const nivel = !R.urg ? '—' : q < .35 ? 'Básico' : q < .75 ? 'Bom' : 'Detalhado';
+  $('qual').textContent = nivel; $('barraQ').style.width = Math.round(q * 100) + '%';
+
+  const d = dicas();
+  document.querySelectorAll('.dica').forEach(el => {
+    const id = el.id.slice(2);
+    if(d[id]){ el.textContent = d[id]; el.classList.remove('oculto'); } else el.classList.add('oculto');
+  });
+
+  const item = x => `<li><button type="button" data-ir="${x.id}">${escH(x.l)}</button></li>`;
+  const fb = $('faltam');
+  if(fb){
+    if(f.length){ fb.classList.remove('oculto'); fb.innerHTML = '<b>Ainda falta preencher (obrigatório):</b><ul>' + f.map(item).join('') + '</ul>'; }
+    else fb.classList.add('oculto');
+  }
+  const mb = $('melhorar');
+  if(mb){
+    const pend = m.filter(x => !x.ok);
+    if(pend.length){ mb.classList.remove('oculto'); mb.innerHTML = `<b>Para um diagnóstico mais rápido, responda também:</b><ul>` + pend.map(item).join('') + '</ul>'; }
+    else mb.classList.add('oculto');
+  }
+  const msg = $('msg'); if(msg) msg.textContent = mensagem();
+  salva();
+}
+
+/* ---------- ações ---------- */
+function irMensagem(){
+  if(!R.urg){ flash('Escolha primeiro a situação da embarcação.'); window.scrollTo({top:0, behavior:'smooth'}); return; }
+  const alvo = ['faltam','melhorar','msg'].map($).find(el => el && !el.classList.contains('oculto'));
+  if(alvo) alvo.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function confirmaIncompleto(){
+  const f = pendencias();
+  if(f.length) return confirm('Ainda faltam ' + f.length + ' informação(ões) obrigatória(s):\n- ' + f.map(x => x.l).join('\n- ') + '\n\nEnviar assim mesmo?');
+  const pend = melhorias().filter(x => !x.ok);
+  if(pend.length >= 4) return confirm('O relato ainda está pouco detalhado. Responder mais ' + pend.length + ' pergunta(s) ajuda a elétrica a diagnosticar sem precisar ligar de volta.\n\nEnviar assim mesmo?');
+  return true;
+}
+function copiar(){
+  if(!confirmaIncompleto()) return;
+  const txt = mensagem();
+  registrar('copiar');
+  const ok = () => flash('Mensagem copiada. Cole no grupo do WhatsApp.');
+  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(ok, () => fbCopia(txt, ok));
+  else fbCopia(txt, ok);
+}
+function fbCopia(txt, ok){
+  const ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;opacity:0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); ok(); }catch(e){ flash('Não foi possível copiar. Selecione o texto da mensagem.'); }
+  document.body.removeChild(ta);
+}
+function compartilhar(){
+  if(!R.urg){ irMensagem(); return; }
+  if(!confirmaIncompleto()) return;
+  const txt = mensagem();
+  registrar('enviar');
+  if(navigator.share){
+    navigator.share({text: txt}).catch(err => { if(err && err.name !== 'AbortError') abreZap(txt); });
+  } else abreZap(txt);
+}
+function abreZap(txt){ window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank'); }
+/* ---------- registro do chamado na planilha (Google Apps Script) ---------- */
+function camposRegistro(){
+  const u = URG[R.urg] || {emoji:'', nome:''};
+  const det = !R.sis ? '' : SIS[R.sis].ex.map(q => {
+    const v = q.tipo === 'leituras'
+      ? q.campos.filter(c => !vazio(R.extra[c.k])).map(c => `${c.l} ${limpa(R.extra[c.k])}${c.u?' '+c.u:''}`).join(' · ')
+      : lista(R.extra[q.k]);
+    return vazio(v) ? '' : `${q.r}: ${v}`;
+  }).filter(Boolean).join(' | ');
+  const feito = R.feito.map(f => {
+    let d = '';
+    if(f === 'Rearmou disjuntor') d = junta(R.rearmeQtd && limpa(R.rearmeQtd) + 'x', R.rearmeTempo && 'desarmou: ' + limpa(R.rearmeTempo));
+    if(f === 'Reconheceu / resetou o alarme') d = R.resetRes.toLowerCase();
+    if(f === 'Desligou e religou o equipamento') d = R.religaRes.toLowerCase();
+    if(f === 'Passou para o equipamento reserva') d = R.reservaRes.toLowerCase();
+    return f + (d ? ' → ' + d : '');
+  }).concat(R.feitoDet ? [limpa(R.feitoDet)] : []).join(' | ');
+  return {
+    id: idChamado(), prioridade: [u.emoji, u.nome].filter(Boolean).join(' '),
+    embarcacao: limpa(R.emb), condicao: R.condicao, nome: limpa(R.nome), funcao: limpa(R.funcao), contato: limpa(R.contato),
+    sistema: R.sis ? SIS[R.sis].n : '', equipamento: limpa(R.equip), detalhes: det, problema: limpa(R.oque),
+    antes: junta(lista(R.antes), limpa(R.antesDet)), percebido: junta(lista(R.sinais), limpa(R.sinaisOnde)), continua: limpa(R.continua),
+    alarme: R.alarme ? limpa(R.alarme) : (R.semAlarme ? 'nenhum na tela' : ''), inicio: dh(R.quando), frequencia: R.freq,
+    padrao: SE.intermitente() ? junta(limpa(R.vezes) && limpa(R.vezes) + ' em 24 h', lista(R.padrao)) : '',
+    historico: junta(R.hist, SE.historico() ? limpa(R.histDet) : ''), mudancas: junta(lista(R.mudancas), limpa(R.mudDet)),
+    feito: feito, situacao: R.situacao, redundancia: R.red, janela: R.janela, evidencias: R.evid.join(', '),
+    faltando: pendencias().map(x => x.l).join(', '), detalhe: ($('qual') || {}).textContent || '', mensagem: mensagem()
+  };
+}
+function registrar(origem){
+  const st = $('statusReg');
+  try{
+    if(typeof google === 'undefined' || !google.script || !google.script.run) return;
+    const dados = camposRegistro(); dados.origem = origem;
+    if(st) st.textContent = 'Registrando o chamado para a equipe de elétrica…';
+    google.script.run
+      .withSuccessHandler(r => { const s = $('statusReg'); if(s) s.textContent = r && r.ok ? `Chamado ${r.id} registrado para a equipe de elétrica ✓` : 'Não foi possível registrar o chamado agora. Envie a mensagem no grupo normalmente.'; })
+      .withFailureHandler(() => { const s = $('statusReg'); if(s) s.textContent = 'Sem conexão para registrar o chamado agora. Envie a mensagem no grupo normalmente.'; })
+      .registrarChamado(dados);
+  }catch(e){ if(st) st.textContent = ''; }
+}
+function flash(m){
+  const d = document.createElement('div'); d.textContent = m;
+  d.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:74px;background:#14202E;color:#fff;padding:10px 16px;border-radius:2px;font-size:.86rem;z-index:50;max-width:90vw;text-align:center';
+  document.body.appendChild(d); setTimeout(() => d.remove(), 2400);
+}
+function pedirNovo(){
+  const b = $('btNovo');
+  b.outerHTML = `<button type="button" id="btNovo" onclick="reiniciar()" style="background:#A8443B;border-color:#A8443B;color:#fff">Apagar e recomeçar</button>`;
+  setTimeout(() => { const x = $('btNovo');
+    if(x && /Apagar/.test(x.textContent)) x.outerHTML = `<button type="button" class="claro" id="btNovo" onclick="pedirNovo()">Novo</button>`;
+  }, 4000);
+}
+function reiniciar(){
+  const manter = {emb:R.emb, nome:R.nome, funcao:R.funcao, contato:R.contato};
+  R = Object.assign(novoEstado(), manter);
+  recuperado = false;
+  monta(); window.scrollTo({top:0});
+  $('btNovo').outerHTML = `<button type="button" class="claro" id="btNovo" onclick="pedirNovo()">Novo</button>`;
+}
+
+monta();
+</script>
+</body>
+</html>
